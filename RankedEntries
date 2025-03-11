@@ -1,0 +1,212 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Team class
+class Team {
+public:
+    string teamName;
+    int teamNumber;
+    long regYear;
+    int firstScore;
+    int secondScore;
+    double finalScore;
+
+    Team(string name, int number, long year, int score1, int score2) {
+        teamName = name;
+        teamNumber = number;
+        regYear = year;
+        firstScore = score1;
+        secondScore = score2;
+        finalScore = ((score1 + score2) / 2.0);
+    }
+};
+
+// Node class
+class Node {
+public:
+    Team* team;
+    Node* nextNode;
+
+    Node(Team* t) {
+        team = t;
+        nextNode = nullptr;
+    }
+};
+
+// CompetitionEntry class
+class CompetitionEntry {
+private:
+    Node* head;
+
+public:
+    CompetitionEntry() : head(nullptr) {}
+
+    // Register a new team
+    void registerTeam() {
+        string name;
+        int number, score1, score2;
+        long year;
+
+        cout << "Enter Team Name: ";
+        cin >> name;
+        cout << "Enter Team Number: ";
+        cin >> number;
+        cout << "Enter Registration Year: ";
+        cin >> year;
+        cout << "Enter First Score: ";
+        cin >> score1;
+        cout << "Enter Second Score: ";
+        cin >> score2;
+
+        Team* newTeam = new Team(name, number, year, score1, score2);
+        Node* newNode = new Node(newTeam);
+
+        newNode->nextNode = head;
+        head = newNode;
+
+        cout << "Team registered successfully!" << endl;
+    }
+
+    // De-register the last team
+    void deregister_Last_team() {
+        if (!head) {
+            cout << "No teams to deregister." << endl;
+            return;
+        }
+
+        if (!head->nextNode) {
+            delete head;
+            head = nullptr;
+            return;
+        }
+
+        Node* temp = head;
+        while (temp->nextNode->nextNode) {
+            temp = temp->nextNode;
+        }
+
+        delete temp->nextNode;
+        temp->nextNode = nullptr;
+
+        cout << "Last team deregistered successfully!" << endl;
+    }
+
+    // De-register a particular team
+    void deregister_Particular_team(int teamNumber) {
+        if (!head) {
+            cout << "No teams to deregister." << endl;
+            return;
+        }
+
+        if (head->team->teamNumber == teamNumber) {
+            Node* temp = head;
+            head = head->nextNode;
+            delete temp;
+            cout << "Team deregistered successfully!" << endl;
+            return;
+        }
+
+        Node* current = head;
+        while (current->nextNode && current->nextNode->team->teamNumber != teamNumber) {
+            current = current->nextNode;
+        }
+
+        if (!current->nextNode) {
+            cout << "Team not found." << endl;
+            return;
+        }
+
+        Node* temp = current->nextNode;
+        current->nextNode = current->nextNode->nextNode;
+        delete temp;
+
+        cout << "Team deregistered successfully!" << endl;
+    }
+
+    // Insert a new team before a given team number
+    void insertBefore(int teamNumber, Team* newTeam) {
+        Node* newNode = new Node(newTeam);
+
+        if (!head || head->team->teamNumber == teamNumber) {
+            newNode->nextNode = head;
+            head = newNode;
+            return;
+        }
+
+        Node* current = head;
+        while (current->nextNode && current->nextNode->team->teamNumber != teamNumber) {
+            current = current->nextNode;
+        }
+
+        newNode->nextNode = current->nextNode;
+        current->nextNode = newNode;
+    }
+
+    // Return the size of the competition entry
+    int competitionEntrySize() {
+        int count = 0;
+        Node* temp = head;
+        while (temp) {
+            count++;
+            temp = temp->nextNode;
+        }
+        return count;
+    }
+
+    // Display all teams
+    void display() {
+        Node* temp = head;
+        while (temp) {
+            cout << "Team: " << temp->team->teamName << " | Number: " << temp->team->teamNumber
+                 << " | Year: " << temp->team->regYear << " | Scores: " << temp->team->firstScore
+                 << ", " << temp->team->secondScore << " | Final Score: " << temp->team->finalScore << endl;
+            temp = temp->nextNode;
+        }
+    }
+};
+
+int main() {
+    CompetitionEntry comp;
+    int choice;
+
+    do {
+        cout << "\n1. Register Team";
+        cout << "\n2. Deregister Last Team";
+        cout << "\n3. Deregister Particular Team";
+        cout << "\n4. Display All Teams";
+        cout << "\n5. Competition Entry Size";
+        cout << "\n6. Exit";
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            comp.registerTeam();
+            break;
+        case 2:
+            comp.deregister_Last_team();
+            break;
+        case 3: {
+            int teamNumber;
+            cout << "Enter team number to deregister: ";
+            cin >> teamNumber;
+            comp.deregister_Particular_team(teamNumber);
+            break;
+        }
+        case 4:
+            comp.display();
+            break;
+        case 5:
+            cout << "Number of teams registered: " << comp.competitionEntrySize() << endl;
+            break;
+        case 6:
+            cout << "Exiting..." << endl;
+            break;
+        default:
+            cout << "Invalid choice. Try again." << endl;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
